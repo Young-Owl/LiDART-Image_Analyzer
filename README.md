@@ -57,9 +57,9 @@ We can break down this repository into 3 parts:
 
 - Image Reading / Modifying:
 	- ``imageAnalyzer.py``: This script is responsible for analyzing the resulting pictures of a script called ``boardControl.py`` present in the ``LiDART Board Control`` repo.
-	- ``imageMerger.py``: When using various pictures with the same attributes for a more 'accurate' value, this script can be used to merge all the corresponding pictures into a single one.
-	- ``maxImageBit.py``: Check where the max pixel value is located and present an histogram of all pixel values.
-	- ``merger.py``: It was used to merge all baselines pictures into one. Deprecated method and not factually right for data analysis.
+	- ``imageMerger.py``: (Used for specific tests) When using various pictures with the same attributes for a more 'accurate' value, this script can be used to merge all the corresponding pictures into a single one.
+	- ``maxImageBit.py``: (Used for specific tests - Might not prove useful) Check where the max pixel value is located and present an histogram of all pixel values.
+	- ``merger.py``: (Deprecated - Old method) It was used to merge all baselines pictures into one. Deprecated method and not factually right for data analysis.
 - Result formatter:
 	- ``reformatJsons.py``: After using the ``imageAnalyzer.py`` script, some ``.json`` files will be created. This script formats them for an easier review of all the values to further enhance transferring values into Excel for example.
 - Results:
