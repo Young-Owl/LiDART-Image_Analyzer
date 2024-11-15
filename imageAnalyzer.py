@@ -20,7 +20,7 @@ from natsort import natsorted, ns, os_sorted
 
 # -------- Global DEFINES --------
 # These defines are set manually to choose which set of pics will be showm, analyzed and plotted
-IMAGES_PATH = "../LiDART_Script/images/good/25jul/"   # Path to the images
+IMAGES_PATH = "../LiDART_Script/images/good/7ago/1laser/"   # Path to the images
 POTENCY     = "30mW"                                         # Potency of the laser 
 EXPOSURE    = "50us"                                        # Exposure time
 GB          = "GB_ON"                                       # Gain boost
@@ -151,9 +151,9 @@ def main():
     # User input
     treshold = int(80)
     distances = [1,2,4,8,16,24,46]
-    squareSize = 200
+    squareSize = 125
     squareSizeBackup = squareSize
-    squareDecrease = 25
+    squareDecrease = 15
     
     pixels = np.zeros(len(distances))
     maxVal = np.zeros(len(distances))
@@ -235,14 +235,14 @@ def main():
     plt.xticks(fontsize=6)
     plt.show() """
     
-    plt.hist(valsBaselineGB, bins=256, density=False, alpha=0.6, color='k', edgecolor='black', linewidth=1.1)
+    """ plt.hist(valsBaselineGB, bins=256, density=False, alpha=0.6, color='k', edgecolor='black', linewidth=1.1)
     plt.xlabel('Pixel value')
     plt.ylabel('Number of pixels')
     plt.title('Baseline histogram (GB_ON)')
     plt.xlim(int(avgPixelValueGB - 100), int(avgPixelValueGB + 100))
     plt.xticks(fontsize=6)
     plt.xticks(np.arange(min(np.unique(valsBaselineGB)), 266+1, 14))
-    plt.show()
+    plt.show() """
     
 
         
@@ -275,28 +275,6 @@ def main():
         img_noBaseline[imageFile] = img[imageFile].copy()
         img_blackNwhite[imageFile] = img[imageFile].copy()
         
-        # Temporary - Crop the top of the image
-        if not "1m" in imageFile:
-            crop = 400
-            img[imageFile] = img[imageFile][crop:img[imageFile].shape[0], 0:img[imageFile].shape[1]]
-            img_noBaseline[imageFile] = img_noBaseline[imageFile][crop:img_noBaseline[imageFile].shape[0], 0:img_noBaseline[imageFile].shape[1]]
-            img_blackNwhite[imageFile] = img_blackNwhite[imageFile][crop:img_blackNwhite[imageFile].shape[0], 0:img_blackNwhite[imageFile].shape[1]]
-        
-        # Temporary - Crop the right and left of the image
-        # If it is 24 or 46, crop
-        if "24m" in imageFile or "46m" in imageFile:
-            print(Fore.BLUE + "Cropping the right and left of the image")
-            crop2 = 600
-            img[imageFile] = img[imageFile][0:img[imageFile].shape[0], crop2:img[imageFile].shape[1] - (crop2)]
-            img_noBaseline[imageFile] = img_noBaseline[imageFile][0:img_noBaseline[imageFile].shape[0], crop2:img_noBaseline[imageFile].shape[1] - (crop2)]
-            img_blackNwhite[imageFile] = img_blackNwhite[imageFile][0:img_blackNwhite[imageFile].shape[0], crop2:img_blackNwhite[imageFile].shape[1] - (crop2)]
-        
-        """ # Temporary - Crop the right of the image
-        crop = 1050
-        img[imageFile] = img[imageFile][0:img[imageFile].shape[0], 0:img[imageFile].shape[1] - crop]
-        img_noBaseline[imageFile] = img_noBaseline[imageFile][0:img_noBaseline[imageFile].shape[0], 0:img_noBaseline[imageFile].shape[1] - crop]
-        img_blackNwhite[imageFile] = img_blackNwhite[imageFile][0:img_blackNwhite[imageFile].shape[0], 0:img_blackNwhite[imageFile].shape[1] - crop]
-         """
         # Remove the background avgPixelValue from the image
         if GB == "GB_OFF":
             for i in range(img[imageFile].shape[0]):
@@ -315,8 +293,10 @@ def main():
         
         # Find the max pixel coordinates
         maxPixelCoordinates = np.where(img_noBaseline[imageFile] == np.amax(img_noBaseline[imageFile]))
+            
         maxPixelCoordinatesArray[imageFile] = maxPixelCoordinates
         #print(Fore.YELLOW + "Max pixel coordinates: " + str(maxPixelCoordinates))
+        
         # Get the max pixel value
         maxPixelValue = float(np.amax(img_noBaseline[imageFile]))
 
@@ -355,31 +335,6 @@ def main():
                 if img_blackNwhite[imageFile][i, j, 0] != 255:
                     img_blackNwhite[imageFile][i, j] = [0, 0, 0]
         
-        """ # With the white pixels, calculate the average pixels coordinates; 
-        # Later calculate from the pixel coordinates obtained, the average distance from the center to all the other white pixels
-        for i in range(img_blackNwhite[imageFile].shape[0]):
-            for j in range(img_blackNwhite[imageFile].shape[1]):
-                if img_blackNwhite[imageFile][i, j, 0] == 255:
-                    avgX.append(j)
-                    avgY.append(i)
-                    avgDistance.append(np.sqrt((j - maxPixelCoordinates[1][0])**2 + (i - maxPixelCoordinates[0][0])**2))
-        
-        # Calculate the average distance from the center to all the other white pixels
-        avgDistance = np.average(avgDistance)
-        print(Fore.YELLOW + "Average distance from the center to all the other white pixels: " + str(avgDistance))
-        
-        # Calculate the average pixel coordinates
-        avgX = np.average(avgX)
-        avgY = np.average(avgY) """
-        
-        # Normalize the images to the max pixel value
-        #img[imageFile] = cv2.normalize(img[imageFile], None, 0, maxPixelValue, cv2.NORM_MINMAX, cv2.CV_16U)
-        
-        # Draw a circle around the average pixel coordinates
-        #cv2.circle(img_blackNwhite[imageFile], (int(avgX), int(avgY)), int(avgDistance*1.5), (100, 100, 100), 1)
-
-        # Draw a rectangle around the max pixel taking into account the square size
-        #cv2.rectangle(img_blackNwhite[imageFile], (maxPixelCoordinates[1][0] - int(squareSize/2), maxPixelCoordinates[0][0] - int(squareSize/2)), (maxPixelCoordinates[1][0] + int(squareSize/2), maxPixelCoordinates[0][0] + int(squareSize/2)), (100, 100, 100), 1)
         
         pixels[k] = count
         maxVal[k] = maxPixelValue
@@ -390,6 +345,7 @@ def main():
         print(Fore.YELLOW + "Number of pixels above the treshold: " + str(pixels[k]))
         print(Fore.YELLOW + "Sum of all pixel values above the threshold: " + str(potencyCnt[k]))
         k += 1
+        
     cnt = 0
     squareSize = squareSizeBackup
     windowWidth = 200
@@ -433,36 +389,23 @@ def main():
         cnt += 1
         
     cv2.waitKey(0)
-    
-    
-    # Plot the results (Pixels Vs Distance)
-    """ plt.plot(distances, pixels)
-    plt.plot(distances, maxVal)
-    plt.xlabel("Distance (m)")
-    plt.ylabel("Number of pixels")
-    plt.title("%s; %s; %s; %s" % (POTENCY, EXPOSURE, GB, FOCUS))
-    plt.show() """
-    
     print(Fore.GREEN + "Done!")
-    
     
     # Create a dictionary with the results according to which potencyValues are being used
     # and then save them to a json file
-    
     result[POTENCY][EXPOSURE][GB][FOCUS] = pixels.tolist()
     resultMax[POTENCY][EXPOSURE][GB][FOCUS] = maxVal.tolist()
     resultsPotency[POTENCY][EXPOSURE][GB][FOCUS] = potencyCnt.tolist()
-    #print(result)
     
     # Save the pics
     for imageFile in img:
         
         # Res up the image
-        img_blackNwhite[imageFile] = cv2.resize(img_blackNwhite[imageFile], (img_blackNwhite[imageFile].shape[1]*2, img_blackNwhite[imageFile].shape[0]*2), interpolation=cv2.INTER_NEAREST)
+        #img_blackNwhite[imageFile] = cv2.resize(img_blackNwhite[imageFile], (img_blackNwhite[imageFile].shape[1]*2, img_blackNwhite[imageFile].shape[0]*2), interpolation=cv2.INTER_NEAREST)
         #cv2.imwrite(subFolderPath[0] + "Results/" + imageFile, img_blackNwhite[imageFile])
         
-        #img_noBaseline[imageFile] = cv2.resize(img_noBaseline[imageFile], (img_noBaseline[imageFile].shape[1]*2, img_noBaseline[imageFile].shape[0]*2), interpolation=cv2.INTER_NEAREST)
-        #cv2.imwrite(subFolderPath[0] + "Results/" + imageFile + "_noBaseline.png", img_noBaseline[imageFile])
+        img_noBaseline[imageFile] = cv2.resize(img_noBaseline[imageFile], (img_noBaseline[imageFile].shape[1]*2, img_noBaseline[imageFile].shape[0]*2), interpolation=cv2.INTER_NEAREST)
+        cv2.imwrite(subFolderPath[0] + "Results/" + imageFile + "_noBaseline.png", img_noBaseline[imageFile])
     
     
     if os.path.exists("results.json"):
@@ -522,8 +465,6 @@ def main():
         json.dump(dataPotency, outfile)
         return
 
-        
-    
 
 if __name__ == '__main__':
     main()
